@@ -1,0 +1,15 @@
+.todo {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 1rem;
+    align-items: center;
+    padding-left: 0.5rem;
+}
+
+.complete {
+    border-left: 10px solid green;
+}
+
+.incomplete {
+    border-left: 10px solid red;
+}

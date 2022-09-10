@@ -21,16 +21,17 @@ export enum ACTIONS {
 
 function App() {
   const [todoName, setTodoName] = useState('')
-  const [editTodo, setEditTodo] = useState(-1)
+  const [editTodo, setEditTodo] = useState<null | number>(null)
+  const [duplicateTodo, setDuplicateTodo] = useState(false)
   const [todoList, dispatch] = useReducer(reducer, [] as TodoType[])
 
   function reducer(todoList: TodoType[], action: Action) {
     switch (action.type) {
       case ACTIONS.ADD:
-        if (editTodo !== -1) {
+        if (editTodo) {
           return todoList.map((todo) => {
             if (todo.id === editTodo) {
-              setEditTodo(-1)
+              setEditTodo(null)
               return { ...todo, name: action.payload as string }
             }
             return todo
@@ -60,8 +61,20 @@ function App() {
 
   const submitHandler = (e: FormEvent) => {
     e.preventDefault()
-    dispatch({ type: ACTIONS.ADD, payload: todoName})
-    setTodoName('')
+    if (todoName.trim() && !isDuplicateName()) {
+      dispatch({ type: ACTIONS.ADD, payload: todoName.trim()})
+      setTodoName('')
+    }
+  }
+
+  const isDuplicateName = () => {
+    return todoList.find((todo) => {
+      if (todo.name === todoName.trim()) {
+        setDuplicateTodo(true)
+        setTimeout(() => setDuplicateTodo(false), 2000)
+        return todo
+      }
+    })
   }
 
   const handleToggle = (id: number) => {
@@ -70,7 +83,7 @@ function App() {
 
   const handleDelete = (id: number) => {
     dispatch({ type: ACTIONS.DELETE, payload: id })
-    setEditTodo(-1)
+    setEditTodo(null)
   }
 
   const handleUpdate = (id: number) => {
@@ -78,10 +91,18 @@ function App() {
     todoList.map((todo) => todo.id === id ? setTodoName(todo.name): null)
   }
 
+  const cancelEdit = () => {
+    setEditTodo(null)
+    setTodoName('')
+  }
+
   return (
     <div className="App">
       <form onSubmit={submitHandler}>
         <input type="text" value={todoName} onChange={(e) => setTodoName(e.target.value)} />
+        <button onClick={submitHandler}>{editTodo ? 'Update' : 'Add' }</button>
+        {editTodo && <button onClick={cancelEdit}>Cancel</button>}
+        { duplicateTodo && <div className="errorText">Todo Already Exists</div>}
       </form>
       <div className="todo_list_container">
         {
