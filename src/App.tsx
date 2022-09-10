@@ -125,7 +125,7 @@ function App() {
       </form>
       <div className="todo_list_container">
         {
-          todoList.map((todo: TodoType, index: number) =>
+          todoList.map((todo) =>
             <Todo
               key={todo.id}
               todo={todo}
