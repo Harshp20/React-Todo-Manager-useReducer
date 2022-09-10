@@ -128,7 +128,6 @@ function App() {
           todoList.map((todo: TodoType, index: number) =>
             <Todo
               key={todo.id}
-              index={index}
               todo={todo}
               handleToggle={handleToggle}
               handleDelete={handleDelete}
