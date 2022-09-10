@@ -1,13 +1,20 @@
 .todo {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
-    gap: 1rem;
+    grid-gap: 1rem;
     align-items: center;
     padding-left: 0.5rem;
+}::selection {
+    visibility: hidden;
 }
 
 .complete {
     border-left: 10px solid green;
+    color: #555;
+
+    span {
+        text-decoration: line-through;
+    }
 }
 
 .incomplete {

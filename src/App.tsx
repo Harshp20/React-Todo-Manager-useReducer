@@ -1,4 +1,4 @@
-import { useState, useReducer, FormEvent } from 'react';
+import { useState, useReducer, useEffect, FormEvent } from 'react';
 import './App.css';
 import Todo from './components/Todo'
 
@@ -23,7 +23,18 @@ function App() {
   const [todoName, setTodoName] = useState('')
   const [editTodo, setEditTodo] = useState<null | number>(null)
   const [duplicateTodo, setDuplicateTodo] = useState(false)
-  const [todoList, dispatch] = useReducer(reducer, [] as TodoType[])
+  const [todoList, dispatch] = useReducer(reducer, initState())
+
+  function initState() {
+    if (localStorage.getItem('todo-list')) {
+      return JSON.parse(localStorage.getItem('todo-list') as string)
+    }
+    return [] as TodoType[]
+  }
+
+  useEffect(() => {
+    localStorage.setItem('todo-list', JSON.stringify(todoList))
+  }, [todoList])
 
   function reducer(todoList: TodoType[], action: Action) {
     switch (action.type) {
@@ -32,19 +43,18 @@ function App() {
           return todoList.map((todo) => {
             if (todo.id === editTodo) {
               setEditTodo(null)
-              return { ...todo, name: action.payload as string }
+              if (todo.status) {
+                return { ...todo, name: action.payload as string, status: !todo.status }
+              } else {
+                return { ...todo, name: action.payload as string}
+              }
             }
             return todo
           })
         }
         return [addTodo(action.payload as string), ...todoList]
       case ACTIONS.TOGGLE:
-        return todoList.map((todo) => {
-          if (todo.id === action.payload) {
-            return { ...todo, status: !todo.status }
-          }
-          else return todo
-        })
+        return toggleTodo(todoList, action.payload as number)
       case ACTIONS.DELETE:
         return todoList.filter((todo) => todo.id !== action.payload)
     }
@@ -59,10 +69,19 @@ function App() {
     }
   }
 
+  function toggleTodo(todoList: TodoType[], id: number) {
+    return todoList.map((todo) => {
+      if (todo.id === id) {
+        return { ...todo, status: !todo.status }
+      }
+      else return todo
+    })
+  }
+
   const submitHandler = (e: FormEvent) => {
     e.preventDefault()
     if (todoName.trim() && !isDuplicateName()) {
-      dispatch({ type: ACTIONS.ADD, payload: todoName.trim()})
+      dispatch({ type: ACTIONS.ADD, payload: todoName.trim() })
       setTodoName('')
     }
   }
@@ -88,7 +107,7 @@ function App() {
 
   const handleUpdate = (id: number) => {
     setEditTodo(id)
-    todoList.map((todo) => todo.id === id ? setTodoName(todo.name): null)
+    todoList.map((todo) => todo.id === id ? setTodoName(todo.name) : null)
   }
 
   const cancelEdit = () => {
@@ -100,9 +119,9 @@ function App() {
     <div className="App">
       <form onSubmit={submitHandler}>
         <input type="text" value={todoName} onChange={(e) => setTodoName(e.target.value)} />
-        <button onClick={submitHandler}>{editTodo ? 'Update' : 'Add' }</button>
+        <button onClick={submitHandler}>{editTodo ? 'Update' : 'Add'}</button>
         {editTodo && <button onClick={cancelEdit}>Cancel</button>}
-        { duplicateTodo && <div className="errorText">Todo Already Exists</div>}
+        {duplicateTodo && <div className="errorText">Todo Already Exists</div>}
       </form>
       <div className="todo_list_container">
         {
