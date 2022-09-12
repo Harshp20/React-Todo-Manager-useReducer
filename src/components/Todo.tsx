@@ -1,5 +1,6 @@
 import { TodoType } from '../App'
 import './Todo.scss'
+import '../App.scss'
 
 interface TodoProps {
     todo: TodoType
@@ -9,16 +10,11 @@ interface TodoProps {
 }
 
 function Todo({ todo, handleToggle, handleDelete, handleUpdate }: TodoProps) {
-
-    const showTodo = (todo: TodoType, index: number) => {
-        return ``
-    }
-
     return (
-        <div className={`todo ${todo.status ? 'complete' : 'incomplete'}`}>
+        <div className={`todo ${todo.status ? 'complete' : ''}`}>
             <span onDoubleClick={() => handleToggle(todo.id)} key={todo.id}>{todo.name}</span>
-            <button onClick={() => handleDelete(todo.id)} >Delete</button>
-            <button onClick={() => handleUpdate(todo.id)}>Update</button>
+            <button className='btn delete' onClick={() => handleDelete(todo.id)} >Delete</button>
+            <button className='btn update' onClick={() => handleUpdate(todo.id)}>Edit</button>
         </div>
     )
 }

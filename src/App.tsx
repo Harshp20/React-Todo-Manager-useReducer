@@ -1,5 +1,5 @@
 import { useState, useReducer, useEffect, FormEvent } from 'react';
-import './App.css';
+import './App.scss';
 import Todo from './components/Todo'
 
 export type TodoType = {
@@ -20,6 +20,7 @@ export enum ACTIONS {
 }
 
 function App() {
+  const [isAddNew, setIsAddNew] = useState(false)
   const [todoName, setTodoName] = useState('')
   const [editTodo, setEditTodo] = useState<null | number>(null)
   const [duplicateTodo, setDuplicateTodo] = useState(false)
@@ -46,7 +47,7 @@ function App() {
               if (todo.status) {
                 return { ...todo, name: action.payload as string, status: !todo.status }
               } else {
-                return { ...todo, name: action.payload as string}
+                return { ...todo, name: action.payload as string }
               }
             }
             return todo
@@ -106,6 +107,7 @@ function App() {
   }
 
   const handleUpdate = (id: number) => {
+    setIsAddNew(true)
     setEditTodo(id)
     todoList.map((todo) => todo.id === id ? setTodoName(todo.name) : null)
   }
@@ -115,14 +117,23 @@ function App() {
     setTodoName('')
   }
 
+  const handleDone = () => {
+    setEditTodo(null)
+    setIsAddNew(!isAddNew)
+    setTodoName('')
+  }
+
   return (
     <div className="App">
-      <form onSubmit={submitHandler}>
-        <input type="text" value={todoName} onChange={(e) => setTodoName(e.target.value)} />
-        <button onClick={submitHandler}>{editTodo ? 'Update' : 'Add'}</button>
-        {editTodo && <button onClick={cancelEdit}>Cancel</button>}
-        {duplicateTodo && <div className="errorText">Todo Already Exists</div>}
-      </form>
+      {!isAddNew && <button onClick={() => setIsAddNew(!isAddNew)} className="btn add_new">Add New +</button>}
+      {isAddNew && <button onClick={handleDone} className="btn done">Done</button>}
+      {isAddNew &&
+        <form onSubmit={submitHandler}>
+          <input type="text" placeholder='Add something...' value={todoName} onChange={(e) => setTodoName(e.target.value)} />
+          <button onClick={submitHandler} className="btn add_new">{editTodo ? 'Update' : 'Add +'}</button>
+          {editTodo && <button className="btn delete" onClick={cancelEdit}>Cancel</button>}
+        </form>}
+      <div className={`errorText ${duplicateTodo ? 'show' : ''}`}>Todo Already Exists</div>
       <div className="todo_list_container">
         {
           todoList.map((todo) =>
